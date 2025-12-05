@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 # ConversationHandler - для FSM (конечный автомат для состояния диалога)
 from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, filters     
 from models.user import Booking
@@ -121,7 +121,12 @@ class BookingHandlers:
     async def confirm_booking(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user
 
+        # СПЕРВА отправляем сообщение с удалением клавиатуры
         if update.message.text == '✅ Подтвердить':
+            await update.message.reply_text(
+                ".",
+                reply_markup=ReplyKeyboardRemove()
+        )
             # Извлекаем все данные о бронировании из временного хранилища
             service = context.user_data['service']
             date_str = context.user_data['date']
@@ -145,13 +150,15 @@ class BookingHandlers:
                 f"📅 Дата: {date_str}\n"
                 f"⏰ Время: {time_str}\n\n"
                 f"Ждём вас! 🎯",
-                reply_markup=None  # Убираем клавиатуру
             )
         else:
+            await update.message.reply_text(
+            ".",
+            reply_markup=ReplyKeyboardRemove()
+        )
             # если пользователь нажал кнопку "Отменить", отправляем сообщение об отмене
             await update.message.reply_text(
                 "❌ Запись отменена",
-                reply_markup=None  # Убираем клавиатуру
             )
 
         context.user_data.clear()
